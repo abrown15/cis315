@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -7,14 +8,9 @@ import java.util.Set;
 public class Assignment6 {
 
     public static Set<String> dictionary = new HashSet<>();
-    public static SplitData recursiveSplitData;    //Both split arrays should have length n
+    public static SplitData recursiveSplitData;    //Both SplitData objects should have length n for both arrays
     public static SplitData iterativeSplitData;    //  ''      ''      ''      ''      ''
 
-    public static int[][] recursiveLex;               /*recursiveLex[i] returns number of possible words starting at
-                                                      recursiveSplitArray[i]*/
-
-    public static int[][] iterativeLex;               /*iterativeLex[i] returns number of possible words starting at
-                                                      iterativeSplitArray[i]*/
 
     public static void main(String[] args) {
         //Load Dictionary
@@ -49,9 +45,28 @@ public class Assignment6 {
     }
 
 
-    //FIXME                                                        //SplitArray should have length n
-    public static Boolean recursiveSplit(int i){
-        return true;
+    //FIXME                                                        //Still need to memoize
+    public static Boolean recursiveSplit(String currentString){
+
+        //Length of current stirng/sub-string
+        int n = currentString.length();
+
+        //Base Case
+        if (n == 0){
+            return true;
+        }
+
+        //Try all prefixes of length from 1 to n
+        for(int i = 0; i < n; i ++){
+
+            //Recurrence Relation
+            if(dictionary.contains(currentString.substring(0, i)) && recursiveSplit(currentString.substring(i, n - i))){
+                return true;
+            }
+        }
+
+        //If we've tried every possible prefix and none work, we return false
+        return false;
     }
 
     //Takes iterative/recursive SplitArray AND iterative/recursive lex as input
@@ -102,6 +117,9 @@ class SplitData {
     //Holds original string
     private String originalString;
 
+    //Holds length of original string
+    public int length;
+
     //solutionArray[i] returns whether or not it is possible to add spaces to Xi,X(i+1),...,Xn
     Boolean[] solutionArray;
 
@@ -111,7 +129,16 @@ class SplitData {
 
     //Takes as input, length of original string
     public SplitData(String originalString){
+
+        //Initialize with original String and associated length
         this.originalString = originalString;
+        this.length = originalString.length();
+
+        //Initialze solution array, make all elements false at init
+        this.solutionArray = new Boolean[length + 1];
+        for(int i = 0; i < this.length; i ++){
+            this.solutionArray[i] = false;
+        }
     }
 
     public String getOriginalString() {
@@ -124,6 +151,11 @@ class SplitData {
 
     public String[][] getSubStrings(){
         return subStrings;
+    }
+
+    //Takes as input, length of original string
+    public void setSolutionArray(int length){
+
     }
 }
 
