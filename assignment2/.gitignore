@@ -1,0 +1,10 @@
+#Ignore all idea/ folder files
+.idea/
+
+#Ignore any idea/ output files
+out/
+
+#Ignore idea/ .iml files
+.iml
+
+

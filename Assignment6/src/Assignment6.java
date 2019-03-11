@@ -8,44 +8,9 @@ import java.util.Set;
 public class Assignment6 {
 
     public static Set<String> dictionary = new HashSet<>();
-    public static SplitData recursiveSplitData;    //Both SplitData objects should have length n for both arrays
-    public static SplitData iterativeSplitData;    //  ''      ''      ''      ''      ''
 
-
-    public static void main(String[] args) {
-        //Load Dictionary
-        loadDictionary("diction10k.txt");
-
-        //Test Dictionary
-        System.out.println("Test Dictionary");
-        System.out.println("Word a: " + dictionary.contains("a"));
-        System.out.println("Word the: " + dictionary.contains("the"));
-
-        Scanner scanner = new Scanner(System.in);
-        int numStrings = scanner.nextInt();          //retrieve the number of lines
-
-        for(int i = 0; i < numStrings; ++i){
-            String currentString = scanner.nextLine();
-            int n = currentString.length();
-
-            System.out.println("Phrase Number: " + i);
-            System.out.println(currentString);
-            System.out.println("");
-
-            System.out.println("Memoized Attempt:");
-            if(recursiveSplit(0)){
-                System.out.println("YES, can be split");
-                printSplit(recursiveSplitData);
-            } else {
-                System.out.println("NO, cannot be split");
-            }
-        }
-
-        return;
-    }
-
-
-    //FIXME                                                        //Still need to memoize
+    //FIXME                                                        Still need to memoize but accurately returns
+    //                                                             whether given string can be split into words.
     public static Boolean recursiveSplit(String currentString){
 
         //Length of current stirng/sub-string
@@ -56,11 +21,12 @@ public class Assignment6 {
             return true;
         }
 
-        //Try all prefixes of length from 1 to n
+        //Try all prefixes of length from 0 to n-1
         for(int i = 0; i < n; i ++){
 
+//            System.out.println(currentString.substring(0,i));       //DEBUG: Check current Substring
             //Recurrence Relation
-            if(dictionary.contains(currentString.substring(0, i)) && recursiveSplit(currentString.substring(i, n - i))){
+            if((dictionary.contains(currentString.substring(0, i+1))) && recursiveSplit(currentString.substring(i+1, n))){
                 return true;
             }
         }
@@ -69,92 +35,65 @@ public class Assignment6 {
         return false;
     }
 
-    //Takes iterative/recursive SplitArray AND iterative/recursive lex as input
-    //Prints valid string w/spaces
-    public static void printSplit(SplitData data){
-        int length = data.solutionArray.length;
-
-        int i = 0;
-        while(i < length){
-
-            /*We are ONLY calling printSplit on valid strings. So, if lex[0].length == 1,
-            Then there is only one word that starts with x0 which we must use*/
-            if(data.subStrings[i].length == 1){
-                System.out.print(data.subStrings[0][0] + " ");
-
-                //Since there's only one possible word here, we increment i by it's length
-                i += data.subStrings[0][0].length();
-
-            //FIXME
-            } else {
-                return;
-            }
-        }
-
-    }
-
-    public static void loadDictionary(String dictionaryFileName){
+    public static void loadDictionary(String dictionaryFileName) {
         File inFile = new File(dictionaryFileName);
 
-        try{
+        try {
             Scanner scan = new Scanner(inFile);
             String line;
 
-            while(scan.hasNext()){
+            while (scan.hasNext()) {
                 line = scan.next();
                 dictionary.add(line.trim());
             }
             scan.close();
-        } catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
-}
 
-// Modified this class from one I found at https://stackoverflow.com/questions/17296571/making-a-mixed-2d-array-in-java
-class SplitData {
 
-    //Holds original string
-    private String originalString;
+    public static void main(String[] args) {
+        //Load Dictionary
+        loadDictionary("diction10k.txt");
 
-    //Holds length of original string
-    public int length;
+//        //Test Dictionary
+//        System.out.println("Test Dictionary");
+//        System.out.println("Word a: " + dictionary.contains("a"));
+//        System.out.println("Word the: " + dictionary.contains("the"));
 
-    //solutionArray[i] returns whether or not it is possible to add spaces to Xi,X(i+1),...,Xn
-    Boolean[] solutionArray;
+        Scanner scanner = new Scanner(System.in);
+        int numStrings = scanner.nextInt();         //retrieve the number of lines
+        scanner.nextLine();                         //move to next line of document
 
-    //subStrings[i] returns array of possible words starting with Xi
-    //subStrings[i][j] returns 'jth' possible words starting with Xi
-    String[][] subStrings;
+        String[] line = new String[numStrings];     //Initialize array which stores strings in given file
+        int[] lineLengths = new int[numStrings];    //Initialize array which stores string Line lengths in given file
 
-    //Takes as input, length of original string
-    public SplitData(String originalString){
+        for (int i = 0; i < numStrings; i ++){
+            line[i] = scanner.nextLine();           //Stores strings to be split
+            lineLengths[i] = line[i].length();      //Stores lengths of strings to be split
 
-        //Initialize with original String and associated length
-        this.originalString = originalString;
-        this.length = originalString.length();
-
-        //Initialze solution array, make all elements false at init
-        this.solutionArray = new Boolean[length + 1];
-        for(int i = 0; i < this.length; i ++){
-            this.solutionArray[i] = false;
+            System.out.println(line[i]);            //DEBUG: Prove that ^ works
+            System.out.println(lineLengths[i]);     //DEBUG: Prove that we have ^ lengths
         }
-    }
 
-    public String getOriginalString() {
-        return originalString;
-    }
+        //FIXME
+        for(int j = 0; j < numStrings; j++){
+            String currentString = line[j];         //Initialze current string being split
+            int n = currentString.length();         //Store current string length for later use
 
-    public Boolean[] getSolutionArray(){
-        return  solutionArray;
-    }
+            System.out.println("Memoized Attempt:");
+            System.out.println("Testing: " + currentString);    //DEBUG: Check current String to be split
 
-    public String[][] getSubStrings(){
-        return subStrings;
-    }
-
-    //Takes as input, length of original string
-    public void setSolutionArray(int length){
+            if(recursiveSplit(currentString)){
+                System.out.println("YES, can be split");
+                System.out.println("");
+                //printSplit(recursiveSplitData);
+            } else {
+                System.out.println("NO, cannot be split");
+                System.out.println("");
+            }
+        }
 
     }
 }
